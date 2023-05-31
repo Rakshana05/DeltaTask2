@@ -1,7 +1,7 @@
 const canvas = document.getElementById('board')
 const ctx = canvas.getContext('2d')
 
-canvas.width = document.body.clientWidth
+canvas.width = innerWidth
 canvas.height = innerHeight
 
 class Player {
@@ -73,6 +73,24 @@ class Projectile {
     }
 }
 
+class Home{
+    constructor(){
+        this.width = 70
+        this.height = 40
+
+        this.position = {
+            x:canvas.width/2 - this.width/2,
+            y:canvas.height * 0.75
+        }
+        
+    }
+
+    draw(){
+        ctx.fillStyle = 'aqua'
+        ctx.fillRect(this.position.x,this.position.y,this.width,this.height)
+    }
+}
+
 class Enemy {
     constructor(position) {
         this.velocity = {
@@ -85,8 +103,6 @@ class Enemy {
             x: position.x,
             y:position.y 
         }
-        this.angle = 0
-        this.radius = 20
     }
 
     draw() {
@@ -106,24 +122,26 @@ class Enemy {
 
 class Grid{
     constructor() {
+        const rth = Math.ceil((Math.random() * canvas.width) / 30)
         this.position = {
-            x:0,
+            x:rth,
             y:0
         }
+        const randomVal = Math.floor((Math.random()*3))+0.5
         this.velocity = {
-            x:3,
-            y:0
+            x:0,
+            y:randomVal
         }
         
         this.enemies = []
 
-        const rows = Math.ceil(Math.random() * 3)+2
-        const cols = Math.ceil(Math.random() * 3)+2
+        const rows = Math.ceil(Math.random() * 2)+1
+        const cols = Math.ceil(Math.random() * 2)+2
 
         this.width = cols * 30
 
-        for(let x=0;x<rows;x++){
-            for(let y=0;y<cols;y++){
+        for(let x=rth;x<cols+rth;x++){
+            for(let y=0;y<rows;y++){
                 let pos = {x:x*30,y:y*30}
                 this.enemies.push(new Enemy(pos))
             }
@@ -131,16 +149,8 @@ class Grid{
     }   
 
     update() {
-        this.position.x+=this.velocity.x
         this.position.y+=this.velocity.y
 
-        this.velocity.y =0 
-        if(this.position.x+ this.width >= canvas.width ||
-            this.position.x <=0){
-            this.velocity.x = -this.velocity.x
-            this.velocity.y = 30
-
-        }
     }
 }
 
@@ -149,6 +159,7 @@ class Grid{
 const player = new Player()
 const projectiles = []
 const grids = [new Grid()]
+const home = new Home()
 const keys = {
     ArrowLeft : {
         pressed: false
@@ -158,12 +169,13 @@ const keys = {
     }
 }
 player.draw()
-
+let frames = 0
 function animate() {
     requestAnimationFrame(animate)
     ctx.fillStyle = 'black'
     ctx.fillRect(0,0,canvas.width,canvas.height)
     player.update()
+    home.draw() //update it later
     projectiles.forEach((projectile,index) => {
         if(projectile.position.y + projectile.radius <=0){
             //Timeout 0 sec was set
@@ -175,8 +187,20 @@ function animate() {
 
     grids.forEach(grid => {
         grid.update()
-        grid.enemies.forEach(enemy => {
+        grid.enemies.forEach((enemy,i) => {
             enemy.update({velocity: grid.velocity})
+            
+            projectiles.forEach((projectile,j)=>{
+                if( enemy.position.x <=projectile.position.x+10 &&
+                    enemy.position.x >=projectile.position.x-10 &&
+                    enemy.position.y <=projectile.position.y+10 &&
+                    enemy.position.y+enemy.height >=projectile.position.y-10){
+                    setTimeout(()=>{
+                        grid.enemies.splice(i,1)
+                        projectiles.splice(j,1)  
+                    },0)
+                }
+            })
         })
     })
 
@@ -191,6 +215,11 @@ function animate() {
     else{
         player.velocity.x = 0
     }
+    if(frames%300===0){
+        grids.push(new Grid())
+        frames = 0
+    }
+    frames++
 }
 
 animate()
