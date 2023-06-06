@@ -1,8 +1,8 @@
 const canvas = document.getElementById('board')
 const ctx = canvas.getContext('2d')
 
-canvas.width = innerWidth
-canvas.height = innerHeight
+// canvas.width = innerWidth
+// canvas.height = innerHeight
 
 class Player {
     constructor() {
@@ -55,7 +55,7 @@ class Projectile {
         this.position = position
         this.velocity = velocity
 
-        this.radius = 3
+        this.radius = 5
     }
 
     draw(){
@@ -127,7 +127,7 @@ class Grid{
             x:rth,
             y:0
         }
-        const randomVal = Math.floor((Math.random()*3))+0.5
+        const randomVal = Math.floor((Math.random()*2))+0.5
         this.velocity = {
             x:0,
             y:randomVal
@@ -169,7 +169,6 @@ const keys = {
     }
 }
 player.draw()
-let frames = 0
 function animate() {
     requestAnimationFrame(animate)
     ctx.fillStyle = 'black'
@@ -184,8 +183,7 @@ function animate() {
             projectile.update()
         }
     })
-
-    grids.forEach(grid => {
+    grids.forEach((grid,gridIndex) => {
         grid.update()
         grid.enemies.forEach((enemy,i) => {
             enemy.update({velocity: grid.velocity})
@@ -197,7 +195,11 @@ function animate() {
                     enemy.position.y+enemy.height >=projectile.position.y-10){
                     setTimeout(()=>{
                         grid.enemies.splice(i,1)
-                        projectiles.splice(j,1)  
+                        projectiles.splice(j,1) 
+
+                        if(grid.enemies.length ===0 || enemy.position.y+enemy.height>=canvas.height){
+                            grids.splice(gridIndex,1)
+                        } 
                     },0)
                 }
             })
@@ -215,12 +217,11 @@ function animate() {
     else{
         player.velocity.x = 0
     }
-    if(frames%300===0){
-        grids.push(new Grid())
-        frames = 0
-    }
-    frames++
 }
+
+setInterval(()=>{
+    grids.push(new Grid()) 
+},5000)
 
 animate()
 
