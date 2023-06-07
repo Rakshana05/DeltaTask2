@@ -8,18 +8,33 @@
     <style>
         *{
             margin:0;
-            padding: 0;
+            box-sizing: border-box;
         }
         body{
             display: flex;
             justify-content: center;
         }
+        .gameOver{
+            position: absolute;
+            display: none;
+            text-align: center;
+            padding: 250px 0;
+            height: 100vh;
+            width: 100%;
+            background: radial-gradient(rgba(255, 242, 242, 0.818),rgba(255, 242, 242, 0.467));
+        }
+        h1{
+            font-size: 50px;
+            font-family: Arial, Helvetica, sans-serif;
+        }
         
     </style>
 </head>
 <body>
-    <canvas id="board" width="1000" height="600"></canvas>
-
+    <canvas id="board" ></canvas>
+    <div class="gameOver">
+        <h1>GAME OVER</h1>
+    </div>
     <script src="game.js"></script>
 </body>
 </html>
